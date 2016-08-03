@@ -13,3 +13,19 @@ domain = "{{ traefik_marathon_domain }}"
 watch = true
 networkInterface = "{{ ansible_default_ipv4['interface'] }}"
 ExposedByDefault = {{ traefik_marathon_expose_by_default }}
+
+[file]
+[frontends]
+  [frontends.mantlui]
+  backend = "mantlui"
+  passHostHeader = true
+  priority = 999
+    [frontends.mantlui.routes.test_1]
+    rule = "Host:control2.{{ traefik_marathon_domain }}"
+
+[backends]
+  [backends.mantlui]
+{% for item in groups['role=control'] %}
+    [backends.mantlui.servers.server{{loop.index}}]
+    url = "https://{{ hostvars[item].private_ipv4 }}"
+{% endfor %}
